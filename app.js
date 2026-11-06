@@ -129,6 +129,43 @@ function renderCheckout() {
   document.querySelector("#checkout-total").textContent = formatPrice(subtotal + shipping);
 }
 
+function formatCardNumber(value) {
+  return value.replace(/\D/g, "").slice(0, 19).replace(/(.{4})/g, "$1 ").trim();
+}
+
+function formatExpiry(value) {
+  const digits = value.replace(/\D/g, "").slice(0, 4);
+  if (digits.length <= 2) return digits;
+  return `${digits.slice(0, 2)}/${digits.slice(2)}`;
+}
+
+function validatePaymentForm() {
+  const cardName = document.querySelector("#checkout-card-name");
+  const cardNumber = document.querySelector("#checkout-card-number");
+  const cardExpiry = document.querySelector("#checkout-card-expiry");
+  const cardCvv = document.querySelector("#checkout-card-cvv");
+
+  const cleanedCardNumber = (cardNumber.value || "").replace(/\s+/g, "");
+  const expiryValue = (cardExpiry.value || "").trim();
+  const cvvValue = (cardCvv.value || "").trim();
+
+  if (!cardName.value.trim()) return { valid: false, message: "Enter the name on the card." };
+  if (!/^\d{13,19}$/.test(cleanedCardNumber)) return { valid: false, message: "Enter a valid card number." };
+  if (!/^(0[1-9]|1[0-2])\/\d{2}$/.test(expiryValue)) return { valid: false, message: "Enter the expiration date as MM/YY." };
+
+  const [monthText, yearText] = expiryValue.split("/");
+  const month = Number(monthText);
+  const year = Number(`20${yearText}`);
+  const now = new Date();
+  const expiryDate = new Date(year, month, 0, 23, 59, 59);
+  if (Number.isNaN(month) || Number.isNaN(year) || expiryDate < new Date(now.getFullYear(), now.getMonth(), 1)) {
+    return { valid: false, message: "The card expiration date must be in the future." };
+  }
+
+  if (!/^\d{3,4}$/.test(cvvValue)) return { valid: false, message: "Enter a valid security code." };
+  return { valid: true, message: "" };
+}
+
 function changeQuantity(productId, amount) {
   const nextQuantity = (cart[productId] || 0) + amount;
   if (nextQuantity > 0) cart[productId] = nextQuantity;
@@ -216,8 +253,33 @@ if (document.querySelector("#checkout-form")) {
     if (link.id === "back-to-bag" || link.id === "checkout-cart-link") target.searchParams.set("openCart", "1");
     link.href = target.href;
   });
+
+  const cardNumberInput = document.querySelector("#checkout-card-number");
+  const cardExpiryInput = document.querySelector("#checkout-card-expiry");
+  const cardCvvInput = document.querySelector("#checkout-card-cvv");
+
+  cardNumberInput.addEventListener("input", (event) => {
+    event.target.value = formatCardNumber(event.target.value);
+  });
+  cardExpiryInput.addEventListener("input", (event) => {
+    event.target.value = formatExpiry(event.target.value);
+  });
+  cardCvvInput.addEventListener("input", (event) => {
+    event.target.value = event.target.value.replace(/\D/g, "").slice(0, 4);
+  });
+
   document.querySelector("#checkout-form").addEventListener("submit", (event) => {
     event.preventDefault();
-    document.querySelector("#checkout-feedback").textContent = "Payments are not connected yet. Connect Stripe or Shopify checkout before accepting orders.";
+    const feedback = document.querySelector("#checkout-feedback");
+    const validation = validatePaymentForm();
+
+    if (!validation.valid) {
+      feedback.textContent = validation.message;
+      const invalidField = document.querySelector("#checkout-card-name:invalid, #checkout-card-number:invalid, #checkout-card-expiry:invalid, #checkout-card-cvv:invalid") || document.querySelector("#checkout-card-name");
+      invalidField.focus();
+      return;
+    }
+
+    feedback.textContent = "Payments are not connected yet. Connect Stripe or Shopify checkout before accepting orders.";
   });
 }

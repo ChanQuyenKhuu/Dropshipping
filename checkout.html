@@ -48,6 +48,15 @@
               <label class="checkout-field field-full" for="checkout-phone">Phone number <span class="field-optional">Optional</span><input id="checkout-phone" name="tel" type="tel" autocomplete="tel" /></label>
             </div>
           </section>
+          <section class="checkout-form-section" aria-labelledby="payment-heading">
+            <div class="checkout-section-heading"><span>03</span><h2 id="payment-heading">Payment</h2></div>
+            <div class="checkout-fields-grid">
+              <label class="checkout-field field-full" for="checkout-card-name">Name on card<input id="checkout-card-name" name="card-name" autocomplete="cc-name" required /></label>
+              <label class="checkout-field field-full" for="checkout-card-number">Card number<input id="checkout-card-number" name="card-number" inputmode="numeric" autocomplete="cc-number" placeholder="1234 5678 9012 3456" required /></label>
+              <label class="checkout-field" for="checkout-card-expiry">Expiration date<input id="checkout-card-expiry" name="card-expiry" inputmode="numeric" autocomplete="cc-exp" placeholder="MM/YY" required /></label>
+              <label class="checkout-field" for="checkout-card-cvv">Security code<input id="checkout-card-cvv" name="card-code" inputmode="numeric" autocomplete="cc-csc" maxlength="4" placeholder="CVV" required /></label>
+            </div>
+          </section>
           <div class="payment-setup"><span class="payment-lock" aria-hidden="true">!</span><div><strong>Secure payments aren't connected yet</strong><p>Your details stay in this browser. No order will be charged until a payment provider is connected.</p></div></div>
           <button class="button button-dark checkout-submit" type="submit">Continue to payment <span aria-hidden="true">↗</span></button>
           <p class="checkout-feedback" id="checkout-feedback" aria-live="polite"></p>
