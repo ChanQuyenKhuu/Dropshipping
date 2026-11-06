@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#f6f5ef" />
+    <meta name="description" content="Review your Morrow Supply order and enter shipping details." />
+    <title>Checkout — Morrow Supply</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+    <script src="app.js" defer></script>
+  </head>
+  <body>
+    <div class="announcement">A little something extra: free shipping on orders over $50</div>
+    <header class="site-header">
+      <a class="wordmark" href="index.html" aria-label="Morrow Supply home">morrow<span>®</span></a>
+      <nav class="main-nav" aria-label="Checkout navigation"><a href="index.html#shop">Continue shopping</a></nav>
+      <div class="header-actions">
+        <a class="cart-trigger" id="checkout-cart-link" href="index.html?openCart=1" aria-label="Return to shopping bag">
+          <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 8h14l1 12H4L5 8Z"></path><path d="M9 9V6a3 3 0 0 1 6 0v3"></path></svg>
+          <span>Bag</span><span class="cart-count" id="checkout-cart-count">0</span>
+        </a>
+      </div>
+    </header>
+
+    <main class="checkout-page">
+      <a class="checkout-back" id="back-to-bag" href="index.html?openCart=1"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="m14 18-6-6 6-6M8 12h12"></path></svg>Back to bag</a>
+      <div class="checkout-heading"><span class="eyebrow">Almost yours</span><h1 id="checkout-title">Checkout</h1></div>
+      <div class="checkout-layout">
+        <form class="checkout-form" id="checkout-form">
+          <section class="checkout-form-section" aria-labelledby="contact-heading">
+            <div class="checkout-section-heading"><span>01</span><h2 id="contact-heading">Contact</h2></div>
+            <label class="checkout-field" for="checkout-email">Email address<input id="checkout-email" name="email" type="email" autocomplete="email" required /></label>
+          </section>
+          <section class="checkout-form-section" aria-labelledby="shipping-heading">
+            <div class="checkout-section-heading"><span>02</span><h2 id="shipping-heading">Shipping details</h2></div>
+            <div class="checkout-fields-grid">
+              <label class="checkout-field" for="checkout-first-name">First name<input id="checkout-first-name" name="given-name" autocomplete="given-name" required /></label>
+              <label class="checkout-field" for="checkout-last-name">Last name<input id="checkout-last-name" name="family-name" autocomplete="family-name" required /></label>
+              <label class="checkout-field field-full" for="checkout-address">Street address<input id="checkout-address" name="address-line1" autocomplete="address-line1" required /></label>
+              <label class="checkout-field field-full" for="checkout-address-extra">Apartment, suite, etc. <span class="field-optional">Optional</span><input id="checkout-address-extra" name="address-line2" autocomplete="address-line2" /></label>
+              <label class="checkout-field" for="checkout-city">City<input id="checkout-city" name="city" autocomplete="address-level2" required /></label>
+              <label class="checkout-field" for="checkout-region">State / region<input id="checkout-region" name="region" autocomplete="address-level1" required /></label>
+              <label class="checkout-field" for="checkout-postal">ZIP / postal code<input id="checkout-postal" name="postal-code" autocomplete="postal-code" required /></label>
+              <label class="checkout-field" for="checkout-country">Country<select id="checkout-country" name="country" autocomplete="country-name" required><option value="">Choose a country</option><option>United States</option><option>Canada</option><option>United Kingdom</option><option>Australia</option></select></label>
+              <label class="checkout-field field-full" for="checkout-phone">Phone number <span class="field-optional">Optional</span><input id="checkout-phone" name="tel" type="tel" autocomplete="tel" /></label>
+            </div>
+          </section>
+          <div class="payment-setup"><span class="payment-lock" aria-hidden="true">!</span><div><strong>Secure payments aren't connected yet</strong><p>Your details stay in this browser. No order will be charged until a payment provider is connected.</p></div></div>
+          <button class="button button-dark checkout-submit" type="submit">Continue to payment <span aria-hidden="true">↗</span></button>
+          <p class="checkout-feedback" id="checkout-feedback" aria-live="polite"></p>
+        </form>
+        <aside class="checkout-summary" aria-labelledby="summary-heading">
+          <h2 id="summary-heading">Order summary <span id="checkout-count">(0 items)</span></h2>
+          <div class="checkout-items" id="checkout-items"></div>
+          <div class="checkout-totals">
+            <div><span>Subtotal</span><span id="checkout-subtotal">$0.00</span></div>
+            <div><span>Standard shipping</span><span id="checkout-shipping">$0.00</span></div>
+            <div class="checkout-grand-total"><strong>Total</strong><strong id="checkout-total">$0.00</strong></div>
+          </div>
+          <p class="tax-note">Taxes are calculated by your payment provider.</p>
+          <a class="continue-shopping checkout-continue" id="back-to-store" href="index.html">Keep browsing</a>
+        </aside>
+      </div>
+    </main>
+
+    <footer class="site-footer"><a class="wordmark footer-wordmark" href="index.html">morrow<span>®</span></a><p>Good things for the everyday.</p><span>© 2025 Morrow Supply</span></footer>
+  </body>
+</html>
