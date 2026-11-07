@@ -11,6 +11,7 @@ const products = [
 
 const FREE_SHIPPING_THRESHOLD = 50;
 const STANDARD_SHIPPING_RATE = 4.95;
+const PURCHASED_PRODUCTS_STORAGE_KEY = "morrow-purchased-products";
 const productGrid = document.querySelector("#product-grid");
 const searchInput = document.querySelector("#search-input");
 const sortSelect = document.querySelector("#sort-select");
@@ -64,6 +65,10 @@ function renderProducts() {
       <div class="product-info">
         <div><h3 class="product-name">${product.name}</h3><p class="product-description">${product.description}</p></div>
         <span class="product-price">${formatPrice(product.price)}</span>
+      </div>
+      <div class="product-rating" data-product-rating="${product.id}">
+        <div class="rating-stars" role="group" aria-label="Rate ${product.name}"></div>
+        <span class="rating-label" aria-live="polite"></span>
       </div>
     </article>
   `).join("");
@@ -280,6 +285,24 @@ if (document.querySelector("#checkout-form")) {
       return;
     }
 
-    feedback.textContent = "Payments are not connected yet. Connect Stripe or Shopify checkout before accepting orders.";
+    if (cartQuantity() === 0) {
+      feedback.textContent = "Add an item to your bag before placing a demo order.";
+      return;
+    }
+
+    try {
+      const savedProducts = JSON.parse(localStorage.getItem(PURCHASED_PRODUCTS_STORAGE_KEY) || "[]");
+      const purchasedProducts = new Set(
+        Array.isArray(savedProducts) ? savedProducts.filter((productId) => products.some((product) => product.id === productId)) : []
+      );
+      Object.keys(cart).forEach((productId) => purchasedProducts.add(productId));
+      localStorage.setItem(PURCHASED_PRODUCTS_STORAGE_KEY, JSON.stringify([...purchasedProducts]));
+    } catch (error) {
+      console.error("Could not record purchased products.", error);
+      feedback.textContent = "We couldn't record your demo order. Please try again.";
+      return;
+    }
+
+    feedback.textContent = "Demo order complete. You can now rate the items you purchased. No payment was charged.";
   });
 }
