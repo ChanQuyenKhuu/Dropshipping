@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#f6f5ef" />
+    <meta name="description" content="Create or sign in to your Morrow Supply customer account." />
+    <title>Your account — Morrow Supply</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+    <script type="module" src="account.js"></script>
+  </head>
+  <body>
+    <div class="announcement">A little something extra: free shipping on orders over $50</div>
+    <header class="site-header account-site-header">
+      <a class="wordmark" href="index.html" aria-label="Morrow Supply home">morrow<span>®</span></a>
+      <nav class="main-nav" aria-label="Account navigation">
+        <a href="index.html#shop">Shop all</a>
+        <a href="index.html">Home</a>
+      </nav>
+    </header>
+
+    <main class="account-page">
+      <section class="account-card" aria-labelledby="account-title">
+        <span class="eyebrow"><span class="eyebrow-dot"></span> Your Morrow</span>
+        <h1 id="account-title">A little more personal.</h1>
+        <p class="account-intro">Sign in or create an account to keep your details close.</p>
+
+        <div class="account-status" id="account-status" hidden>
+          <strong></strong>
+          <span></span>
+          <button class="continue-shopping" id="account-sign-out" type="button">Sign out</button>
+        </div>
+
+        <div class="account-mode-switch" role="group" aria-label="Choose account action">
+          <button class="is-active" type="button" data-account-mode="signin" aria-pressed="true">Sign in</button>
+          <button type="button" data-account-mode="signup" aria-pressed="false">Create account</button>
+        </div>
+
+        <form class="account-form" id="account-form">
+          <label class="account-field" id="account-name-field" for="account-name" hidden>
+            Name
+            <input id="account-name" name="name" type="text" autocomplete="name" maxlength="80" />
+          </label>
+          <label class="account-field" for="account-email">
+            Email address
+            <input id="account-email" name="email" type="email" autocomplete="email" required />
+          </label>
+          <label class="account-field" for="account-password">
+            Password
+            <input id="account-password" name="password" type="password" autocomplete="current-password" minlength="8" required />
+          </label>
+          <button class="account-reset" id="account-reset-password" type="button">Forgot password?</button>
+          <button class="button button-dark account-submit" id="account-submit" type="submit">Sign in <span aria-hidden="true">↗</span></button>
+          <p class="account-message" id="account-message" aria-live="polite"></p>
+        </form>
+
+        <p class="account-setup-message" id="firebase-setup-message" hidden>
+          The account form is available, but online account creation and sign-in need Firebase setup. Add your Firebase web app settings to <code>firebase-config.js</code>, enable Email/Password sign-in, and create a Firestore database.
+        </p>
+        <p class="account-privacy-note">Passwords are managed by Firebase Authentication and are never stored by this site.</p>
+      </section>
+    </main>
+
+    <footer class="site-footer"><a class="wordmark footer-wordmark" href="index.html">morrow<span>®</span></a><p>Good things for the everyday.</p><span>© 2025 Morrow Supply</span></footer>
+  </body>
+</html>
