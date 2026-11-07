@@ -19,6 +19,8 @@ function loadDemoOrder() {
       number: typeof order.number === "string" ? order.number : "",
       items: validItems,
       subtotal: Number.isFinite(order.subtotal) ? order.subtotal : 0,
+      promoCode: typeof order.promoCode === "string" ? order.promoCode : "",
+      discount: Number.isFinite(order.discount) && order.discount >= 0 ? order.discount : 0,
       shipping: Number.isFinite(order.shipping) ? order.shipping : 0,
       total: Number.isFinite(order.total) ? order.total : 0
     };
@@ -41,6 +43,10 @@ if (demoOrder) {
     </div>
   `).join("");
   document.querySelector("#order-subtotal").textContent = formatOrderPrice(demoOrder.subtotal);
+  if (demoOrder.discount > 0) {
+    document.querySelector("#order-discount-row").hidden = false;
+    document.querySelector("#order-discount").textContent = `−${formatOrderPrice(demoOrder.discount)}`;
+  }
   document.querySelector("#order-shipping").textContent = demoOrder.shipping === 0
     ? "Free"
     : formatOrderPrice(demoOrder.shipping);

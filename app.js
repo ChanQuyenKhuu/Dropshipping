@@ -11,6 +11,7 @@ const products = [
 
 const FREE_SHIPPING_THRESHOLD = 50;
 const STANDARD_SHIPPING_RATE = 4.95;
+const PROMO_CODES = { MORROW10: 0.1 };
 const PURCHASED_PRODUCTS_STORAGE_KEY = "morrow-purchased-products";
 const PRODUCT_PURCHASE_COUNTS_STORAGE_KEY = "morrow-product-purchase-counts";
 const LAST_DEMO_ORDER_STORAGE_KEY = "morrow-last-demo-order";
@@ -24,6 +25,7 @@ const cartItems = document.querySelector("#cart-items");
 const toast = document.querySelector("#toast");
 let activeCategory = "All";
 let toastTimeout;
+let appliedPromoCode = "";
 let cart = loadCart();
 
 function loadCart() {
@@ -121,6 +123,7 @@ function renderCheckout() {
   const items = products.filter((product) => cart[product.id]);
   const subtotal = cartSubtotal();
   const shipping = subtotal === 0 || subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : STANDARD_SHIPPING_RATE;
+  const discount = appliedPromoCode ? subtotal * PROMO_CODES[appliedPromoCode] : 0;
   document.querySelector("#checkout-cart-count").textContent = cartQuantity();
   document.querySelector("#checkout-count").textContent = `(${cartQuantity()} ${cartQuantity() === 1 ? "item" : "items"})`;
   document.querySelector("#checkout-form button[type='submit']").disabled = cartQuantity() === 0;
@@ -133,7 +136,10 @@ function renderCheckout() {
   `).join("");
   document.querySelector("#checkout-subtotal").textContent = formatPrice(subtotal);
   document.querySelector("#checkout-shipping").textContent = shipping === 0 ? "Free" : formatPrice(shipping);
-  document.querySelector("#checkout-total").textContent = formatPrice(subtotal + shipping);
+  const discountRow = document.querySelector("#checkout-discount-row");
+  discountRow.hidden = discount === 0;
+  document.querySelector("#checkout-discount").textContent = `−${formatPrice(discount)}`;
+  document.querySelector("#checkout-total").textContent = formatPrice(subtotal - discount + shipping);
 }
 
 function formatCardNumber(value) {
@@ -265,6 +271,30 @@ if (document.querySelector("#checkout-form")) {
   const cardExpiryInput = document.querySelector("#checkout-card-expiry");
   const cardCvvInput = document.querySelector("#checkout-card-cvv");
 
+  document.querySelector("#apply-promo-code").addEventListener("click", () => {
+    const promoInput = document.querySelector("#promo-code-input");
+    const promoMessage = document.querySelector("#promo-code-message");
+    const promoCode = promoInput.value.trim().toUpperCase();
+
+    if (!promoCode) {
+      promoMessage.textContent = "Enter a promo code to apply it.";
+      promoMessage.classList.remove("is-success");
+      return;
+    }
+
+    if (!Object.hasOwn(PROMO_CODES, promoCode)) {
+      promoMessage.textContent = "That promo code isn't valid. Try MORROW10.";
+      promoMessage.classList.remove("is-success");
+      return;
+    }
+
+    appliedPromoCode = promoCode;
+    promoInput.value = promoCode;
+    promoMessage.textContent = "MORROW10 applied — 10% off your items.";
+    promoMessage.classList.add("is-success");
+    renderCheckout();
+  });
+
   document.querySelector("#fill-demo-checkout").addEventListener("click", () => {
     Object.entries(window.checkoutDemoData).forEach(([fieldId, value]) => {
       const field = document.getElementById(fieldId);
@@ -315,7 +345,9 @@ if (document.querySelector("#checkout-form")) {
         items: purchasedItems,
         subtotal,
         shipping,
-        total: subtotal + shipping
+        promoCode: appliedPromoCode,
+        discount: appliedPromoCode ? subtotal * PROMO_CODES[appliedPromoCode] : 0,
+        total: subtotal - (appliedPromoCode ? subtotal * PROMO_CODES[appliedPromoCode] : 0) + shipping
       };
       const savedProducts = JSON.parse(localStorage.getItem(PURCHASED_PRODUCTS_STORAGE_KEY) || "[]");
       const purchasedProducts = new Set(

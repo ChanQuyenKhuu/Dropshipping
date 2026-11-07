@@ -67,8 +67,18 @@
         <aside class="checkout-summary" aria-labelledby="summary-heading">
           <h2 id="summary-heading">Order summary <span id="checkout-count">(0 items)</span></h2>
           <div class="checkout-items" id="checkout-items"></div>
+          <div class="promo-code-box">
+            <label for="promo-code-input">Promo code</label>
+            <div class="promo-code-controls">
+              <input id="promo-code-input" type="text" autocomplete="off" placeholder="Enter code" aria-describedby="promo-code-hint promo-code-message" />
+              <button class="button promo-code-apply" id="apply-promo-code" type="button">Apply</button>
+            </div>
+            <p class="promo-code-hint" id="promo-code-hint">Try MORROW10 for 10% off your items.</p>
+            <p class="promo-code-message" id="promo-code-message" aria-live="polite"></p>
+          </div>
           <div class="checkout-totals">
             <div><span>Subtotal</span><span id="checkout-subtotal">$0.00</span></div>
+            <div id="checkout-discount-row" hidden><span>Promo discount</span><span id="checkout-discount"></span></div>
             <div><span>Standard shipping</span><span id="checkout-shipping">$0.00</span></div>
             <div class="checkout-grand-total"><strong>Total</strong><strong id="checkout-total">$0.00</strong></div>
           </div>

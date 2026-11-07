@@ -172,6 +172,15 @@ h1 em, h2 em { color: #a65d46; font-weight: 400; }
 .checkout-summary h2 { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin: 0 0 14px; font-family: "DM Serif Display", Georgia, serif; font-size: 20px; font-weight: 400; }
 .checkout-summary h2 span { color: var(--muted); font-family: "DM Sans", sans-serif; font-size: 8px; }
 .checkout-items { max-height: 300px; overflow-y: auto; }
+.promo-code-box { padding: 14px 0; border-top: 1px solid var(--line); }
+.promo-code-box > label { display: block; margin-bottom: 7px; color: #526258; font-size: 9px; font-weight: 600; }
+.promo-code-controls { display: flex; gap: 7px; }
+.promo-code-controls input { flex: 1; min-width: 0; height: 37px; padding: 0 9px; border: 1px solid #cfd3ca; border-radius: 0; outline-color: #83966a; background: #fff; color: var(--ink); font-size: 10px; }
+.promo-code-apply { min-height: 37px; padding: 0 11px; border: 1px solid #aeb8ac; background: transparent; color: var(--ink); }
+.promo-code-apply:hover { background: #e8ebdd; }
+.promo-code-hint, .promo-code-message { min-height: 12px; margin: 6px 0 0; color: var(--muted); font-size: 8px; }
+.promo-code-message.is-success { color: #56744d; }
+.promo-code-box[hidden], .checkout-totals [hidden], .order-confirmation-total [hidden] { display: none; }
 .checkout-item { display: grid; grid-template-columns: 48px 1fr auto; align-items: center; gap: 9px; padding: 10px 0; border-top: 1px solid var(--line); }
 .checkout-item img { width: 48px; height: 54px; object-fit: cover; background: #e7e5dc; }
 .checkout-item strong { display: block; font-size: 9px; }
