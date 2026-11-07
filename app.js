@@ -12,6 +12,7 @@ const products = [
 const FREE_SHIPPING_THRESHOLD = 50;
 const STANDARD_SHIPPING_RATE = 4.95;
 const PURCHASED_PRODUCTS_STORAGE_KEY = "morrow-purchased-products";
+const LAST_DEMO_ORDER_STORAGE_KEY = "morrow-last-demo-order";
 const productGrid = document.querySelector("#product-grid");
 const searchInput = document.querySelector("#search-input");
 const sortSelect = document.querySelector("#sort-select");
@@ -263,6 +264,17 @@ if (document.querySelector("#checkout-form")) {
   const cardExpiryInput = document.querySelector("#checkout-card-expiry");
   const cardCvvInput = document.querySelector("#checkout-card-cvv");
 
+  document.querySelector("#fill-demo-checkout").addEventListener("click", () => {
+    Object.entries(window.checkoutDemoData).forEach(([fieldId, value]) => {
+      const field = document.getElementById(fieldId);
+      if (!field) return;
+
+      field.value = value;
+      field.dispatchEvent(new Event(field instanceof HTMLSelectElement ? "change" : "input", { bubbles: true }));
+    });
+    document.querySelector("#checkout-demo-message").textContent = "Demo details filled. This test card is not charged.";
+  });
+
   cardNumberInput.addEventListener("input", (event) => {
     event.target.value = formatCardNumber(event.target.value);
   });
@@ -291,18 +303,33 @@ if (document.querySelector("#checkout-form")) {
     }
 
     try {
+      const purchasedItems = Object.entries(cart).map(([productId, quantity]) => {
+        const product = products.find((item) => item.id === productId);
+        return { id: product.id, name: product.name, quantity, price: product.price };
+      });
+      const subtotal = cartSubtotal();
+      const shipping = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : STANDARD_SHIPPING_RATE;
+      const order = {
+        number: `MS-${Date.now().toString(36).toUpperCase()}`,
+        items: purchasedItems,
+        subtotal,
+        shipping,
+        total: subtotal + shipping
+      };
       const savedProducts = JSON.parse(localStorage.getItem(PURCHASED_PRODUCTS_STORAGE_KEY) || "[]");
       const purchasedProducts = new Set(
         Array.isArray(savedProducts) ? savedProducts.filter((productId) => products.some((product) => product.id === productId)) : []
       );
       Object.keys(cart).forEach((productId) => purchasedProducts.add(productId));
       localStorage.setItem(PURCHASED_PRODUCTS_STORAGE_KEY, JSON.stringify([...purchasedProducts]));
+      sessionStorage.setItem(LAST_DEMO_ORDER_STORAGE_KEY, JSON.stringify(order));
+      localStorage.setItem("morrow-cart", "{}");
     } catch (error) {
       console.error("Could not record purchased products.", error);
       feedback.textContent = "We couldn't record your demo order. Please try again.";
       return;
     }
 
-    feedback.textContent = "Demo order complete. You can now rate the items you purchased. No payment was charged.";
+    window.location.assign("thank-you.html");
   });
 }

@@ -10,6 +10,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="styles.css" />
+    <script src="checkout-demo-data.js" defer></script>
     <script src="app.js" defer></script>
   </head>
   <body>
@@ -58,6 +59,8 @@
             </div>
           </section>
           <div class="payment-setup"><span class="payment-lock" aria-hidden="true">!</span><div><strong>Demo checkout only</strong><p>No payment is processed or charged. Submitting this form records a demo purchase so you can rate the items you ordered.</p></div></div>
+          <button class="button checkout-demo-fill" id="fill-demo-checkout" type="button">Fill with demo details</button>
+          <p class="checkout-demo-message" id="checkout-demo-message" aria-live="polite"></p>
           <button class="button button-dark checkout-submit" type="submit">Place demo order <span aria-hidden="true">↗</span></button>
           <p class="checkout-feedback" id="checkout-feedback" aria-live="polite"></p>
         </form>

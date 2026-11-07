@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#f6f5ef" />
+    <meta name="description" content="Your Morrow Supply demo order confirmation." />
+    <title>Thank you — Morrow Supply</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+    <script src="thank-you.js" defer></script>
+  </head>
+  <body>
+    <div class="announcement">A little something extra: free shipping on orders over $50</div>
+    <header class="site-header">
+      <a class="wordmark" href="index.html" aria-label="Morrow Supply home">morrow<span>®</span></a>
+      <nav class="main-nav" aria-label="Confirmation navigation"><a href="index.html#shop">Continue shopping</a></nav>
+    </header>
+
+    <main class="order-confirmation">
+      <section class="order-confirmation-card" aria-labelledby="confirmation-title">
+        <span class="eyebrow"><span class="eyebrow-dot"></span> A little something to celebrate</span>
+        <div class="order-confirmation-mark" aria-hidden="true">✓</div>
+        <h1 id="confirmation-title">Thank you for your order.</h1>
+        <p class="order-confirmation-message" id="order-confirmation-message" aria-live="polite"></p>
+        <p class="order-confirmation-number" id="order-confirmation-number"></p>
+        <div class="order-confirmation-items" id="order-confirmation-items" aria-label="Items in your order"></div>
+        <div class="order-confirmation-total">
+          <div><span>Subtotal</span><strong id="order-subtotal"></strong></div>
+          <div><span>Shipping</span><strong id="order-shipping"></strong></div>
+          <div class="order-confirmation-grand-total"><span>Total</span><strong id="order-total"></strong></div>
+        </div>
+        <p class="order-confirmation-demo">This was a demo order. No payment was processed or charged. You can now rate purchased items from the shop.</p>
+        <a class="button button-dark" href="index.html#shop">Back to the good finds <span aria-hidden="true">↗</span></a>
+      </section>
+    </main>
+
+    <footer class="site-footer"><a class="wordmark footer-wordmark" href="index.html">morrow<span>®</span></a><p>Good things for the everyday.</p><span>© 2025 Morrow Supply</span></footer>
+  </body>
+</html>

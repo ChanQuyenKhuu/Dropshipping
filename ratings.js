@@ -124,12 +124,14 @@ reviewDialog.innerHTML = `
     <button class="button button-dark review-submit" type="submit">Post review <span aria-hidden="true">↗</span></button>
     <p class="review-form-message" aria-live="polite"></p>
   </form>
+  <p class="reviews-thanks" aria-live="polite" hidden>Thanks for sharing your review!</p>
   <p class="review-purchase-note"></p>
 `;
 document.body.append(reviewDialog);
 
 let activeReviewProductId = "";
 let selectedReviewRating = 0;
+let reviewSubmitted = false;
 
 function formatReviewDate(date) {
   if (!date) return "Previous rating";
@@ -176,7 +178,8 @@ function renderReviews(productId) {
 
   const canReview = purchasedProducts.has(productId);
   const form = reviewDialog.querySelector(".review-form");
-  form.hidden = !canReview;
+  form.hidden = !canReview || reviewSubmitted;
+  reviewDialog.querySelector(".reviews-thanks").hidden = !reviewSubmitted;
   reviewDialog.querySelector(".review-purchase-note").textContent = canReview
     ? ""
     : "Complete a demo checkout with this item to leave a review. No payment is charged.";
@@ -185,6 +188,7 @@ function renderReviews(productId) {
 function openReviews(productId) {
   activeReviewProductId = productId;
   selectedReviewRating = 0;
+  reviewSubmitted = false;
   const form = reviewDialog.querySelector(".review-form");
   form.reset();
   reviewDialog.querySelector(".review-form-message").textContent = "";
@@ -266,15 +270,15 @@ if (productGridForRatings) {
       return;
     }
 
-    message.textContent = "Thanks for sharing your review.";
     event.currentTarget.reset();
     selectedReviewRating = 0;
     reviewDialog.querySelectorAll("[data-review-rating]").forEach((button) => {
       button.classList.remove("is-selected");
       button.setAttribute("aria-pressed", "false");
     });
-    renderReviews(activeReviewProductId);
     renderProductRatings();
+    reviewSubmitted = true;
+    renderReviews(activeReviewProductId);
   });
 
   window.addEventListener("storage", (event) => {
@@ -282,7 +286,6 @@ if (productGridForRatings) {
       renderProductRatingsAfterStorageChange();
     }
   });
-
   new MutationObserver(renderProductRatings).observe(productGridForRatings, { childList: true });
   renderProductRatings();
 }
