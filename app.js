@@ -12,6 +12,7 @@ const products = [
 const FREE_SHIPPING_THRESHOLD = 50;
 const STANDARD_SHIPPING_RATE = 4.95;
 const PURCHASED_PRODUCTS_STORAGE_KEY = "morrow-purchased-products";
+const PRODUCT_PURCHASE_COUNTS_STORAGE_KEY = "morrow-product-purchase-counts";
 const LAST_DEMO_ORDER_STORAGE_KEY = "morrow-last-demo-order";
 const productGrid = document.querySelector("#product-grid");
 const searchInput = document.querySelector("#search-input");
@@ -320,8 +321,23 @@ if (document.querySelector("#checkout-form")) {
       const purchasedProducts = new Set(
         Array.isArray(savedProducts) ? savedProducts.filter((productId) => products.some((product) => product.id === productId)) : []
       );
-      Object.keys(cart).forEach((productId) => purchasedProducts.add(productId));
+      const savedPurchaseCounts = JSON.parse(localStorage.getItem(PRODUCT_PURCHASE_COUNTS_STORAGE_KEY) || "{}");
+      const purchaseCounts = savedPurchaseCounts && typeof savedPurchaseCounts === "object" && !Array.isArray(savedPurchaseCounts)
+        ? Object.fromEntries(
+          Object.entries(savedPurchaseCounts).filter(([productId, count]) =>
+            products.some((product) => product.id === productId) && Number.isInteger(count) && count >= 0
+          )
+        )
+        : {};
+      purchasedProducts.forEach((productId) => {
+        purchaseCounts[productId] = Math.max(purchaseCounts[productId] || 0, 1);
+      });
+      Object.keys(cart).forEach((productId) => {
+        purchasedProducts.add(productId);
+        purchaseCounts[productId] = (purchaseCounts[productId] || 0) + 1;
+      });
       localStorage.setItem(PURCHASED_PRODUCTS_STORAGE_KEY, JSON.stringify([...purchasedProducts]));
+      localStorage.setItem(PRODUCT_PURCHASE_COUNTS_STORAGE_KEY, JSON.stringify(purchaseCounts));
       sessionStorage.setItem(LAST_DEMO_ORDER_STORAGE_KEY, JSON.stringify(order));
       localStorage.setItem("morrow-cart", "{}");
     } catch (error) {

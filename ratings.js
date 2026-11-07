@@ -1,6 +1,7 @@
 const PRODUCT_REVIEWS_STORAGE_KEY = "morrow-product-reviews";
 const LEGACY_RATINGS_STORAGE_KEY = "morrow-verified-product-ratings";
 const REVIEWS_PURCHASED_PRODUCTS_STORAGE_KEY = "morrow-purchased-products";
+const REVIEWS_PURCHASE_COUNTS_STORAGE_KEY = "morrow-product-purchase-counts";
 const productGridForRatings = document.querySelector("#product-grid");
 
 function loadPurchasedProducts() {
@@ -15,9 +16,31 @@ function loadPurchasedProducts() {
 
 let purchasedProducts = loadPurchasedProducts();
 
+function loadProductPurchaseCounts() {
+  try {
+    const savedCounts = JSON.parse(localStorage.getItem(REVIEWS_PURCHASE_COUNTS_STORAGE_KEY) || "{}");
+    const counts = savedCounts && typeof savedCounts === "object" && !Array.isArray(savedCounts)
+      ? Object.fromEntries(
+        Object.entries(savedCounts).filter(([, count]) => Number.isInteger(count) && count >= 0)
+      )
+      : {};
+
+    purchasedProducts.forEach((productId) => {
+      counts[productId] = Math.max(counts[productId] || 0, 1);
+    });
+    return counts;
+  } catch (error) {
+    console.error("Could not load product purchase counts.", error);
+    return Object.fromEntries([...purchasedProducts].map((productId) => [productId, 1]));
+  }
+}
+
+let productPurchaseCounts = loadProductPurchaseCounts();
+
 function isValidReview(review) {
   return review && Number.isInteger(review.rating) && review.rating >= 1 && review.rating <= 5 &&
-    typeof review.comment === "string" && typeof review.date === "string";
+    typeof review.comment === "string" && typeof review.date === "string" &&
+    (review.purchaseNumber === undefined || (Number.isInteger(review.purchaseNumber) && review.purchaseNumber > 0));
 }
 
 function loadProductReviews() {
@@ -62,6 +85,28 @@ Object.entries(legacyProductReviews).forEach(([productId, reviews]) => {
 
 function reviewsFor(productId) {
   return productReviews[productId] || [];
+}
+
+function nextReviewPurchaseNumber(productId) {
+  const purchaseCount = productPurchaseCounts[productId] || (purchasedProducts.has(productId) ? 1 : 0);
+  const reviews = reviewsFor(productId);
+  const reviewedPurchaseNumbers = new Set(
+    reviews
+      .map((review) => review.purchaseNumber)
+      .filter((purchaseNumber) => Number.isInteger(purchaseNumber) && purchaseNumber <= purchaseCount)
+  );
+  let unassignedReviewCount = reviews.filter((review) => review.purchaseNumber === undefined).length;
+
+  for (let purchaseNumber = 1; purchaseNumber <= purchaseCount; purchaseNumber += 1) {
+    if (reviewedPurchaseNumbers.has(purchaseNumber)) continue;
+    if (unassignedReviewCount > 0) {
+      unassignedReviewCount -= 1;
+      continue;
+    }
+    return purchaseNumber;
+  }
+
+  return null;
 }
 
 function updateRatingWidget(widget) {
@@ -118,8 +163,8 @@ reviewDialog.innerHTML = `
         <button type="button" data-review-rating="5" aria-label="5 out of 5">★</button>
       </div>
     </fieldset>
-    <label class="review-comment-label">Your comment
-      <textarea name="comment" rows="4" maxlength="500" required placeholder="What did you think? (Up to 500 characters)"></textarea>
+    <label class="review-comment-label">Your comment <span class="field-optional">Optional</span>
+      <textarea name="comment" rows="4" maxlength="500" placeholder="What did you think? (Up to 500 characters)"></textarea>
     </label>
     <button class="button button-dark review-submit" type="submit">Post review <span aria-hidden="true">↗</span></button>
     <p class="review-form-message" aria-live="polite"></p>
@@ -170,19 +215,23 @@ function renderReviews(productId) {
     const date = document.createElement("time");
     date.textContent = formatReviewDate(review.date);
     heading.append(rating, date);
-    const comment = document.createElement("p");
-    comment.textContent = review.comment || "No comment provided.";
-    item.append(heading, comment);
+    if (review.comment) {
+      const comment = document.createElement("p");
+      comment.textContent = review.comment;
+      item.append(comment);
+    }
     list.append(item);
   });
 
-  const canReview = purchasedProducts.has(productId);
+  const hasUnreviewedPurchase = nextReviewPurchaseNumber(productId) !== null;
   const form = reviewDialog.querySelector(".review-form");
-  form.hidden = !canReview || reviewSubmitted;
+  form.hidden = !hasUnreviewedPurchase;
   reviewDialog.querySelector(".reviews-thanks").hidden = !reviewSubmitted;
-  reviewDialog.querySelector(".review-purchase-note").textContent = canReview
+  reviewDialog.querySelector(".review-purchase-note").textContent = hasUnreviewedPurchase
     ? ""
-    : "Complete a demo checkout with this item to leave a review. No payment is charged.";
+    : purchasedProducts.has(productId)
+      ? "You've rated every purchase of this item."
+      : "Complete a demo checkout with this item to leave a review. No payment is charged.";
 }
 
 function openReviews(productId) {
@@ -202,6 +251,7 @@ function openReviews(productId) {
 
 function renderProductRatingsAfterStorageChange() {
   purchasedProducts = loadPurchasedProducts();
+  productPurchaseCounts = loadProductPurchaseCounts();
   productReviews = loadProductReviews();
   Object.entries(legacyProductReviews).forEach(([productId, reviews]) => {
     if (!productReviews[productId]?.length) productReviews[productId] = reviews;
@@ -240,8 +290,11 @@ if (productGridForRatings) {
     event.preventDefault();
     const message = reviewDialog.querySelector(".review-form-message");
 
-    if (!purchasedProducts.has(activeReviewProductId)) {
-      message.textContent = "Complete a demo checkout with this item before leaving a review.";
+    const purchaseNumber = nextReviewPurchaseNumber(activeReviewProductId);
+    if (purchaseNumber === null) {
+      message.textContent = purchasedProducts.has(activeReviewProductId)
+        ? "You've already rated every purchase of this item."
+        : "Complete a demo checkout with this item before leaving a review.";
       return;
     }
     if (!Number.isInteger(selectedReviewRating) || selectedReviewRating < 1 || selectedReviewRating > 5) {
@@ -249,16 +302,12 @@ if (productGridForRatings) {
       return;
     }
 
-    const comment = new FormData(event.currentTarget).get("comment").toString().trim();
-    if (!comment) {
-      message.textContent = "Add a comment before posting your review.";
-      return;
-    }
+    const comment = String(new FormData(event.currentTarget).get("comment") || "").trim();
 
     const previousReviews = productReviews[activeReviewProductId] || [];
     productReviews[activeReviewProductId] = [
       ...previousReviews,
-      { rating: selectedReviewRating, comment, date: new Date().toISOString() }
+      { rating: selectedReviewRating, comment, date: new Date().toISOString(), purchaseNumber }
     ];
 
     try {
@@ -277,12 +326,14 @@ if (productGridForRatings) {
       button.setAttribute("aria-pressed", "false");
     });
     renderProductRatings();
-    reviewSubmitted = true;
+    reviewSubmitted = nextReviewPurchaseNumber(activeReviewProductId) === null;
+    message.textContent = reviewSubmitted ? "" : "Rating saved. You can rate another purchase of this item.";
     renderReviews(activeReviewProductId);
   });
 
   window.addEventListener("storage", (event) => {
-    if (event.key === PRODUCT_REVIEWS_STORAGE_KEY || event.key === REVIEWS_PURCHASED_PRODUCTS_STORAGE_KEY || event.key === null) {
+    if (event.key === PRODUCT_REVIEWS_STORAGE_KEY || event.key === REVIEWS_PURCHASED_PRODUCTS_STORAGE_KEY ||
+      event.key === REVIEWS_PURCHASE_COUNTS_STORAGE_KEY || event.key === null) {
       renderProductRatingsAfterStorageChange();
     }
   });
